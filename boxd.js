@@ -44,7 +44,7 @@ const calculateAverage = ratings => {
 };
 
 // Main function
-const main = async () => {
+(async () => {
     const list = await finalList();
     const ratings = getRatings(list);
     if (ratings.length) {
@@ -52,6 +52,4 @@ const main = async () => {
         const header = document.querySelector(".activity-from-friends > h2.section-heading > a");
         if (header) header.innerHTML += ` • Average rating: ${averageRating}`;
     }
-};
-
-main();
+})();
