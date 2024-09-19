@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Letterboxd Friend Ratings Analyzer
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1.2
 // @description  Analyze ratings from friends on Letterboxd
 // @author       https://github.com/liam-h
 // @match        https://letterboxd.com/film/*
