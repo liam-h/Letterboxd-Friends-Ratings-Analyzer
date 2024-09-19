@@ -68,7 +68,7 @@ function sleep(ms) {
       const averageRating = calculateAverage(ratings);
       const header = document.querySelector(".activity-from-friends > h2.section-heading > a");
       if (header) {
-        header.innerHTML += " - Average rating: " + averageRating;
+        header.innerHTML += " • Average rating: " + averageRating;
       }
     }
   }
