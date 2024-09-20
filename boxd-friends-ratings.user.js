@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Letterboxd Friend Ratings Analyzer
 // @namespace    http://tampermonkey.net/
-// @version      2.2
+// @version      2.2.1
 // @description  Analyze ratings from friends on Letterboxd and show a histogram below the global one.
 // @author       https://github.com/liam-h
 // @match        https://letterboxd.com/film/*
@@ -53,7 +53,7 @@ const constructHistogram = (ratings, user, film) => {
                 <ul>
                     ${bins.map((count, index) => {
                         const stars = ((index / 2) + 0.5).toFixed(1);
-                        const ratingLink = `https://letterboxd.com/${user}/friends/film/${film}/rated/${stars}/`;
+                        const ratingLink = `/${user}/friends/film/${film}/rated/${stars}/`;
                         const barHtml = `<i style="height: ${(maxCount ? (count / maxCount) * 44 : 1)}px;"></i>`;
                         return `
                             <li class="rating-histogram-bar" style="width: 15px; left: ${index * 16}px">
@@ -74,7 +74,7 @@ const constructHistogram = (ratings, user, film) => {
 const placeHistogram = (histogramHtml, averageRating, user, film) => {
     const globalHistogramSection = document.querySelector('.ratings-histogram-chart');
     if (globalHistogramSection) {
-        const friendsRatingsLink = `https://letterboxd.com/${user}/friends/film/${film}/rated/.5-5/`;
+        const friendsRatingsLink = `/${user}/friends/film/${film}/rated/.5-5/`;
         const friendsHistogramSection = document.createElement('section');
         friendsHistogramSection.classList.add('section', 'ratings-histogram-chart');
         friendsHistogramSection.innerHTML = `
