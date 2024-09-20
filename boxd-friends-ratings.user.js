@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Letterboxd Friend Ratings Analyzer
 // @namespace    http://tampermonkey.net/
-// @version      2.1
+// @version      2.2
 // @description  Analyze ratings from friends on Letterboxd and show a histogram below the global one.
 // @author       https://github.com/liam-h
 // @match        https://letterboxd.com/film/*
@@ -44,8 +44,7 @@ const extractUserAndFilm = () => {
 // Construct the friends' rating histogram with links
 const constructHistogram = (ratings, user, film) => {
     const bins = Array(10).fill(0);
-    ratings.forEach(rating => bins[Math.round((rating - 0.5) * 2)]++);
-
+    ratings.forEach(rating => bins[Math.floor((rating - 0.5) * 2)]++);
     const maxCount = Math.max(...bins);
     return `
         <section class="section ratings-histogram-chart">
@@ -53,7 +52,7 @@ const constructHistogram = (ratings, user, film) => {
                 <span class="rating-green rating-green-tiny rating-1"><span class="rating rated-2">★</span></span>
                 <ul>
                     ${bins.map((count, index) => {
-                        const stars = (index % 2 === 0 ? index / 2 : index / 2 + 0.5).toFixed(1);
+                        const stars = ((index / 2) + 0.5).toFixed(1);
                         const ratingLink = `https://letterboxd.com/${user}/friends/film/${film}/rated/${stars}/`;
                         const barHtml = `<i style="height: ${(maxCount ? (count / maxCount) * 44 : 1)}px;"></i>`;
                         return `
@@ -71,7 +70,7 @@ const constructHistogram = (ratings, user, film) => {
     `;
 };
 
-// Place histogram below the global one, adding links for all friends' ratings
+// Place histogram below the global one, adding links
 const placeHistogram = (histogramHtml, averageRating, user, film) => {
     const globalHistogramSection = document.querySelector('.ratings-histogram-chart');
     if (globalHistogramSection) {
