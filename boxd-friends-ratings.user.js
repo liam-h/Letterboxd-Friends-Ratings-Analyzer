@@ -71,7 +71,7 @@ const constructHistogram = (ratings, user, film) => {
     `;
 };
 
-// Place histogram below the global one, adding links
+// Place histogram below the global one, adding links for all friends' ratings
 const placeHistogram = (histogramHtml, averageRating, user, film) => {
     const globalHistogramSection = document.querySelector('.ratings-histogram-chart');
     if (globalHistogramSection) {
