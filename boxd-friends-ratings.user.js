@@ -79,7 +79,7 @@ const placeHistogram = (histogramHtml, averageRating, user, film) => {
         friendsHistogramSection.classList.add('section', 'ratings-histogram-chart');
         friendsHistogramSection.innerHTML = `
             <h2 class="section-heading">
-                <a href="${friendsRatingsLink}">Friends' Ratings</a>
+                <a href="${friendsRatingsLink}">Ratings from friends</a>
                 <span class="average-rating">
                     <a href="${friendsRatingsLink}">
                         <span class="display-rating">${averageRating}</span>
