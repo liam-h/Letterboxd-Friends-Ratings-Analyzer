@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Letterboxd Friend Ratings Analyzer
 // @namespace    http://tampermonkey.net/
-// @version      3.2.1
+// @version      3.3
 // @description  Analyze ratings from friends on Letterboxd, including paginated ratings, and show a histogram below the global one.
 // @author       https://github.com/liam-h
 // @match        https://letterboxd.com/film/*
@@ -14,33 +14,17 @@
 
 const username = "YOUR_USERNAME_HERE";
 
-// Fetch all ratings, including paginated pages
-const fetchAllRatings = (user, film) => {
-    let page = 1;
-    const allRatings = [];
-
-    return (function fetchPage() {
-        return fetchRatingsPage(user, film, page).then(ratingsFromPage => {
-            allRatings.push(...ratingsFromPage);
-            if (ratingsFromPage.length > 0) {
-                page++;
-                return fetchPage();
-            }
-            return allRatings;
-        });
-    })();
-};
-
-// Fetch ratings from a single page as a one-liner
-const fetchRatingsPage = (user, film, page) =>
-    fetch(`https://letterboxd.com/${user}/friends/film/${film}/rated/.5-5/page/${page}`)
+const fetchRatingsPage = (user, film) =>
+    fetch(`https://letterboxd.com/${user}/friends/film/${film}/ratings/rated/.5-5/`)
         .then(response => response.text())
-        .then(html => Array.from(new DOMParser().parseFromString(html, 'text/html').querySelectorAll('.person-table.film-table tbody tr'))
-            .map(row => {
-                const ratingClass = [...row.querySelector('.film-detail-meta .rating').classList]
-                    .find(cls => cls.startsWith('rated-'));
-                return ratingClass ? parseFloat(ratingClass.replace('rated-', '')) / 2 : null;
-            }).filter(Boolean)
+        .then(html =>
+            Array.from(new DOMParser().parseFromString(html, 'text/html').querySelectorAll(".film-rating-group"))
+            .flatMap(section => {
+                const scoreMatch = section.querySelector("h2 .rating")?.className.match(/rated-large-(\d+)/);
+                const score = scoreMatch ? parseFloat(scoreMatch[1]) / 2 : null;
+                const reviewCount = section.querySelectorAll("ul.avatar-list li").length;
+                return score !== null ? Array(reviewCount).fill(score) : [];
+            })
         );
 
 // Construct the friends' rating histogram with links
@@ -96,7 +80,7 @@ const placeHistogram = (histogramHtml, averageRating, user, film, count) => {
 };
 
 // Main function to run the script
-fetchAllRatings(username, film = window.location.href.split('/').slice(-2, -1)[0])
+fetchRatings(username, film = window.location.href.split('/').slice(-2, -1)[0])
     .then(ratings => {
         if (ratings.length) {
             const averageRating = (ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length).toFixed(1);
