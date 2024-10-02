@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Letterboxd Friend Ratings Analyzer
 // @namespace    http://tampermonkey.net/
-// @version      3.1
+// @version      3.2
 // @description  Analyze ratings from friends on Letterboxd, including paginated ratings, and show a histogram below the global one.
 // @author       https://github.com/liam-h
 // @match        https://letterboxd.com/film/*
@@ -10,20 +10,10 @@
 // @run-at       document-end
 // ==/UserScript==
 
+const username = "YOUR_USERNAME_HERE";
+
 // Sleep function
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-
-// Extract username and film name from the URL
-const extractUserAndFilm = async () => {
-    let attempt = 0;
-    while (!document.querySelector('.activity-from-friends > h2 > a') && attempt < 100) {
-        await sleep(100);
-        attempt++;
-    }
-    const linkElement = document.querySelector('.activity-from-friends > h2 > a');
-    const [username, film] = linkElement.href.split('/').slice(3, 8).filter((_, i) => i === 0 || i === 3);
-    return { username, film };
-};
 
 // Fetch all ratings, including paginated pages
 const fetchAllRatings = async (user, film) => {
@@ -87,7 +77,7 @@ const constructHistogram = (ratings, user, film) => {
 };
 
 // Place histogram below the global one, adding links
-const placeHistogram = (histogramHtml, averageRating, user, film) => {
+const placeHistogram = (histogramHtml, averageRating, user, film, count) => {
     const globalHistogramSection = document.querySelector('.ratings-histogram-chart');
     if (globalHistogramSection) {
         const friendsRatingsLink = `/${user}/friends/film/${film}/rated/.5-5/`;
@@ -97,7 +87,7 @@ const placeHistogram = (histogramHtml, averageRating, user, film) => {
             <h2 class="section-heading">
                 <a href="${friendsRatingsLink}">Ratings from friends</a>
                 <span class="average-rating">
-                    <a href="${friendsRatingsLink}">
+                    <a href="${friendsRatingsLink}" title="${count} ratings">
                         <span class="display-rating">${averageRating}</span>
                     </a>
                 </span>
@@ -110,10 +100,10 @@ const placeHistogram = (histogramHtml, averageRating, user, film) => {
 
 // Main function to run the script
 (async () => {
-    const { username, film } = await extractUserAndFilm();
+    const film = window.location.href.split('/').slice(-2, -1)[0];
     const ratings = await fetchAllRatings(username, film);
     if (ratings.length) {
         const averageRating = calculateAverage(ratings);
-        placeHistogram(constructHistogram(ratings, username, film), averageRating, username, film);
+        placeHistogram(constructHistogram(ratings, username, film), averageRating, username, film, ratings.length);
     }
 })();
