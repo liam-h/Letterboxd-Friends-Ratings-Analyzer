@@ -10,7 +10,7 @@
 // @run-at       document-end
 // ==/UserScript==
 
-const username = "splats";
+const username = "YOUR_USERNAME_HERE";
 const film = window.location.href.split('/').slice(-2, -1)[0];
 
 const fetchRatings = (user, film) =>
