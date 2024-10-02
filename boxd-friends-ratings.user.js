@@ -14,7 +14,7 @@
 
 const username = "YOUR_USERNAME_HERE";
 
-const fetchRatingsPage = (user, film) =>
+const fetchRatings = (user, film) =>
     fetch(`https://letterboxd.com/${user}/friends/film/${film}/ratings/rated/.5-5/`)
         .then(response => response.text())
         .then(html =>
