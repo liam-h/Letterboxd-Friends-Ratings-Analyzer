@@ -1,4 +1,4 @@
-# Letterboxd-Friends-Ratings-Analyzer
+# Letterboxd Friends Ratings Analyzer
 Shows the average rating given by your Letterboxd friends. No jQuery, no bs.
 
 Note that in order to use the userscript, you must enter your username at the top.
