@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Letterboxd Friend Ratings Analyzer
 // @namespace    http://tampermonkey.net/
-// @version      3.3.3
+// @version      3.3.4
 // @description  Analyze ratings from friends on Letterboxd, including paginated ratings, and show a histogram below the global one.
 // @author       https://github.com/liam-h
 // @match        https://letterboxd.com/film/*
@@ -19,9 +19,9 @@ const fetchRatings = (user, film) =>
         .then(html =>
             Array.from(new DOMParser().parseFromString(html, 'text/html').querySelectorAll(".film-rating-group"))
             .flatMap(section => {
-                const scoreMatch = section.querySelector("h2 .rating")?.className.match(/rated-large-(\d+)/);
+                const scoreMatch = section.querySelector("h2 > .rating")?.className.match(/rated-large-(\d+)/);
                 const score = scoreMatch ? parseFloat(scoreMatch[1]) / 2 : null;
-                const reviewCount = section.querySelectorAll("ul.avatar-list li").length;
+                const reviewCount = section.querySelectorAll("ul.avatar-list > li").length;
                 return score !== null ? Array(reviewCount).fill(score) : [];
             })
         );
