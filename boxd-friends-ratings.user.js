@@ -1,15 +1,13 @@
 // ==UserScript==
 // @name         Letterboxd Friend Ratings Analyzer
 // @namespace    http://tampermonkey.net/
-// @version      3.3.1
+// @version      3.3.2
 // @description  Analyze ratings from friends on Letterboxd, including paginated ratings, and show a histogram below the global one.
 // @author       https://github.com/liam-h
 // @match        https://letterboxd.com/film/*
 // @grant        none
 // @license      GPLv3
 // @run-at       document-end
-// @downloadURL https://update.greasyfork.org/scripts/509173/Letterboxd%20Friend%20Ratings%20Analyzer.user.js
-// @updateURL https://update.greasyfork.org/scripts/509173/Letterboxd%20Friend%20Ratings%20Analyzer.meta.js
 // ==/UserScript==
 
 const username = "YOUR_USERNAME_HERE";
@@ -45,7 +43,7 @@ const constructHistogram = (ratings, user, film) => {
                         return `
                             <li class="rating-histogram-bar" style="width: 15px; left: ${index * 16}px">
                                 ${count > 0
-                                    ? `<a href="${ratingLink}" class="ir tooltip" title="${count} ratings">${stars}★ ${barHtml}</a>`
+                                    ? `<a href="${ratingLink}" class="ir tooltip" title="${count} ${count == 1 ? "rating" : "ratings"}">${stars}★ ${barHtml}</a>`
                                     : `${stars}★ ${barHtml}`}
                             </li>
                         `;
@@ -68,7 +66,7 @@ const placeHistogram = (histogramHtml, averageRating, user, film, count) => {
             <h2 class="section-heading">
                 <a href="${friendsRatingsLink}">Ratings from friends</a>
                 <span class="average-rating">
-                    <a href="${friendsRatingsLink}" title="${count} ratings">
+                    <a href="${friendsRatingsLink}" title="${count} ${count == 1 ? "rating" : "ratings"}">
                         <span class="display-rating">${averageRating}</span>
                     </a>
                 </span>
