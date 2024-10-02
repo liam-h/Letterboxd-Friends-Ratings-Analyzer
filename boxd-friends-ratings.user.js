@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Letterboxd Friend Ratings Analyzer
 // @namespace    http://tampermonkey.net/
-// @version      3.3
+// @version      3.3.1
 // @description  Analyze ratings from friends on Letterboxd, including paginated ratings, and show a histogram below the global one.
 // @author       https://github.com/liam-h
 // @match        https://letterboxd.com/film/*
@@ -12,10 +12,8 @@
 // @updateURL https://update.greasyfork.org/scripts/509173/Letterboxd%20Friend%20Ratings%20Analyzer.meta.js
 // ==/UserScript==
 
-const username = "YOUR_USERNAME_HERE";
-
 const fetchRatings = (user, film) =>
-    fetch(`https://letterboxd.com/${user}/friends/film/${film}/ratings/rated/.5-5/`)
+    fetch(`/${user}/friends/film/${film}/ratings/rated/.5-5/`)
         .then(response => response.text())
         .then(html =>
             Array.from(new DOMParser().parseFromString(html, 'text/html').querySelectorAll(".film-rating-group"))
@@ -80,7 +78,7 @@ const placeHistogram = (histogramHtml, averageRating, user, film, count) => {
 };
 
 // Main function to run the script
-fetchRatings(username, film = window.location.href.split('/').slice(-2, -1)[0])
+fetchRatings(username = "splats", film = window.location.href.split('/').slice(-2, -1)[0])
     .then(ratings => {
         if (ratings.length) {
             const averageRating = (ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length).toFixed(1);
