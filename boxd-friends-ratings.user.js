@@ -12,6 +12,8 @@
 // @updateURL https://update.greasyfork.org/scripts/509173/Letterboxd%20Friend%20Ratings%20Analyzer.meta.js
 // ==/UserScript==
 
+const username = "YOUR_USERNAME_HERE";
+
 const fetchRatings = (user, film) =>
     fetch(`/${user}/friends/film/${film}/ratings/rated/.5-5/`)
         .then(response => response.text())
@@ -78,7 +80,7 @@ const placeHistogram = (histogramHtml, averageRating, user, film, count) => {
 };
 
 // Main function to run the script
-fetchRatings(username = "splats", film = window.location.href.split('/').slice(-2, -1)[0])
+fetchRatings(username, film = window.location.href.split('/').slice(-2, -1)[0])
     .then(ratings => {
         if (ratings.length) {
             const averageRating = (ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length).toFixed(1);
