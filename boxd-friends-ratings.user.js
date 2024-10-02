@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Letterboxd Friend Ratings Analyzer
 // @namespace    http://tampermonkey.net/
-// @version      3.3.2
+// @version      3.3.3
 // @description  Analyze ratings from friends on Letterboxd, including paginated ratings, and show a histogram below the global one.
 // @author       https://github.com/liam-h
 // @match        https://letterboxd.com/film/*
@@ -11,6 +11,7 @@
 // ==/UserScript==
 
 const username = "YOUR_USERNAME_HERE";
+const film = window.location.href.split('/').slice(-2, -1)[0];
 
 const fetchRatings = (user, film) =>
     fetch(`/${user}/friends/film/${film}/ratings/rated/.5-5/`)
@@ -43,7 +44,7 @@ const constructHistogram = (ratings, user, film) => {
                         return `
                             <li class="rating-histogram-bar" style="width: 15px; left: ${index * 16}px">
                                 ${count > 0
-                                    ? `<a href="${ratingLink}" class="ir tooltip" title="${count} ${count == 1 ? "rating" : "ratings"}">${stars}★ ${barHtml}</a>`
+                                    ? `<a href="${ratingLink}" class="ir tooltip" title="${count} ${'★'.repeat(stars).concat(stars % 1 == 0 ? '' : '½')} ${count == 1 ? "rating" : "ratings"}">${stars}★ ${barHtml}</a>`
                                     : `${stars}★ ${barHtml}`}
                             </li>
                         `;
@@ -78,7 +79,7 @@ const placeHistogram = (histogramHtml, averageRating, user, film, count) => {
 };
 
 // Main function to run the script
-fetchRatings(username, film = window.location.href.split('/').slice(-2, -1)[0])
+fetchRatings(username, film)
     .then(ratings => {
         if (ratings.length) {
             const averageRating = (ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length).toFixed(1);
