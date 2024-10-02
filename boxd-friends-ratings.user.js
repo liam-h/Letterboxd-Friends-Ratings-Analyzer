@@ -1,50 +1,47 @@
 // ==UserScript==
 // @name         Letterboxd Friend Ratings Analyzer
 // @namespace    http://tampermonkey.net/
-// @version      3.2
+// @version      3.2.1
 // @description  Analyze ratings from friends on Letterboxd, including paginated ratings, and show a histogram below the global one.
 // @author       https://github.com/liam-h
 // @match        https://letterboxd.com/film/*
 // @grant        none
 // @license      GPLv3
 // @run-at       document-end
+// @downloadURL https://update.greasyfork.org/scripts/509173/Letterboxd%20Friend%20Ratings%20Analyzer.user.js
+// @updateURL https://update.greasyfork.org/scripts/509173/Letterboxd%20Friend%20Ratings%20Analyzer.meta.js
 // ==/UserScript==
 
 const username = "YOUR_USERNAME_HERE";
 
-// Sleep function
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
-
 // Fetch all ratings, including paginated pages
-const fetchAllRatings = async (user, film) => {
+const fetchAllRatings = (user, film) => {
     let page = 1;
-    let allRatings = [];
-    let hasMorePages = true;
+    const allRatings = [];
 
-    while (hasMorePages) {
-        const ratingsFromPage = await fetchRatingsPage(user, film, page);
-        allRatings = [...allRatings, ...ratingsFromPage];
-        hasMorePages = ratingsFromPage.length > 0;
-        page++;
-    }
-    return allRatings;
+    return (function fetchPage() {
+        return fetchRatingsPage(user, film, page).then(ratingsFromPage => {
+            allRatings.push(...ratingsFromPage);
+            if (ratingsFromPage.length > 0) {
+                page++;
+                return fetchPage();
+            }
+            return allRatings;
+        });
+    })();
 };
 
-// Fetch ratings from a single page
-const fetchRatingsPage = async (user, film, page) => {
-    const url = `https://letterboxd.com/${user}/friends/film/${film}/rated/.5-5/page/${page}`;
-    const response = await fetch(url);
-    const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
-    return Array.from(doc.querySelectorAll('.person-table.film-table tbody tr'))
-        .map(row => {
-            const ratingClass = [...row.querySelector('.film-detail-meta .rating').classList]
-                .find(cls => cls.startsWith('rated-'));
-            return ratingClass ? parseFloat(ratingClass.replace('rated-', '')) / 2 : null;
-        }).filter(Boolean);
-};
-
-// Calculate average rating for friends
-const calculateAverage = ratings => (ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length).toFixed(1);
+// Fetch ratings from a single page as a one-liner
+const fetchRatingsPage = (user, film, page) =>
+    fetch(`https://letterboxd.com/${user}/friends/film/${film}/rated/.5-5/page/${page}`)
+        .then(response => response.text())
+        .then(html => Array.from(new DOMParser().parseFromString(html, 'text/html').querySelectorAll('.person-table.film-table tbody tr'))
+            .map(row => {
+                const ratingClass = [...row.querySelector('.film-detail-meta .rating').classList]
+                    .find(cls => cls.startsWith('rated-'));
+                return ratingClass ? parseFloat(ratingClass.replace('rated-', '')) / 2 : null;
+            }).filter(Boolean)
+        );
 
 // Construct the friends' rating histogram with links
 const constructHistogram = (ratings, user, film) => {
@@ -99,11 +96,10 @@ const placeHistogram = (histogramHtml, averageRating, user, film, count) => {
 };
 
 // Main function to run the script
-(async () => {
-    const film = window.location.href.split('/').slice(-2, -1)[0];
-    const ratings = await fetchAllRatings(username, film);
-    if (ratings.length) {
-        const averageRating = calculateAverage(ratings);
-        placeHistogram(constructHistogram(ratings, username, film), averageRating, username, film, ratings.length);
-    }
-})();
+fetchAllRatings(username, film = window.location.href.split('/').slice(-2, -1)[0])
+    .then(ratings => {
+        if (ratings.length) {
+            const averageRating = (ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length).toFixed(1);
+            placeHistogram(constructHistogram(ratings, username, film), averageRating, username, film, ratings.length);
+        }
+    });
