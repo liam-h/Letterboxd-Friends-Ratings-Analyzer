@@ -1,7 +1,6 @@
 // ==UserScript==
 // @name         Letterboxd Friend Ratings Analyzer
-// @namespace    http://tampermonkey.net/
-// @version      3.4
+// @version      3.5
 // @description  Analyze ratings from friends on Letterboxd, including paginated ratings, and show a histogram below the global one.
 // @author       https://github.com/liam-h
 // @match        https://letterboxd.com/film/*
@@ -32,7 +31,7 @@ const constructHistogram = (ratings, user, film) => {
     const maxCount = Math.max(...bins);
 
     return `
-        <section class="section ratings-histogram-chart">
+        <section class="section ratings-histogram-chart" style="height: 27px;">
             <div class="rating-histogram rating-histogram-exploded">
                 <span class="rating-green rating-green-tiny rating-1"><span class="rating rated-2">★</span></span>
                 <ul>
